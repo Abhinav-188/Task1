@@ -527,32 +527,32 @@ Diagram note: This sequence supports both existing-thread messaging and API-leve
 
 ```plantuml
 @startuml
-left to right direction
-object Student
-object Admin
-object Frontend
-object AuthAPI
-object AdminAPI
+autonumber
+actor Student
+actor Admin
+participant Frontend
+participant AuthAPI
+participant AdminAPI
 database UserDB
 
-Student -> Frontend : 1: submitSignup()
-Frontend -> AuthAPI : 1.1: POST signup-request
-AuthAPI -> UserDB : 1.1.1: create/update pending student
-AuthAPI -> Frontend : 1.2: signup response
+Student -> Frontend : submitSignup()
+Frontend -> AuthAPI : POST signup-request
+AuthAPI -> UserDB : create/update pending student
+AuthAPI --> Frontend : signup response
 
-Admin -> Frontend : 2: viewPendingRequests()
-Frontend -> AdminAPI : 2.1: GET pending requests
-AdminAPI -> UserDB : 2.1.1: query pending users
-AdminAPI -> Frontend : 2.2: pending list
+Admin -> Frontend : viewPendingRequests()
+Frontend -> AdminAPI : GET pending requests
+AdminAPI -> UserDB : query pending users
+AdminAPI --> Frontend : pending list
 
-Admin -> Frontend : 3: approve(studentId)
-Frontend -> AdminAPI : 3.1: POST approve
-AdminAPI -> UserDB : 3.1.1: set status approved
+Admin -> Frontend : approve(studentId)
+Frontend -> AdminAPI : POST approve
+AdminAPI -> UserDB : set status approved
 
-Student -> Frontend : 4: login()
-Frontend -> AuthAPI : 4.1: POST login
-AuthAPI -> UserDB : 4.1.1: validate credentials/status
-AuthAPI -> Frontend : 4.2: auth result
+Student -> Frontend : login()
+Frontend -> AuthAPI : POST login
+AuthAPI -> UserDB : validate credentials/status
+AuthAPI --> Frontend : auth result
 @enduml
 ```
 
@@ -562,22 +562,22 @@ Diagram note: Numbered messages emphasize object collaboration rather than stric
 
 ```plantuml
 @startuml
-left to right direction
-object Student
-object Frontend
-object ProductAPI
+autonumber
+actor Student
+participant Frontend
+participant ProductAPI
 database UserDB
 database SequenceDB
 database ProductDB
 
-Student -> Frontend : 1: submitListingForm()
-Frontend -> ProductAPI : 1.1: POST /products
-ProductAPI -> ProductAPI : 1.1.1: validate payload
-ProductAPI -> UserDB : 1.1.2: resolve seller by email
-ProductAPI -> SequenceDB : 1.1.3: next product sequence
-ProductAPI -> ProductDB : 1.1.4: insert product
-ProductAPI -> Frontend : 1.2: listing created
-Frontend -> Student : 1.3: success UI/navigation
+Student -> Frontend : submitListingForm()
+Frontend -> ProductAPI : POST /products
+ProductAPI -> ProductAPI : validate payload
+ProductAPI -> UserDB : resolve seller by email
+ProductAPI -> SequenceDB : next product sequence
+ProductAPI -> ProductDB : insert product
+ProductAPI --> Frontend : listing created
+Frontend --> Student : success UI/navigation
 @enduml
 ```
 
@@ -587,27 +587,27 @@ Diagram note: This communication view focuses on responsibility distribution acr
 
 ```plantuml
 @startuml
-left to right direction
-object Student
-object Frontend
-object MessageAPI
+autonumber
+actor Student
+participant Frontend
+participant MessageAPI
 database ConversationDB
 database MessageDB
 database SequenceDB
 
-Student -> Frontend : 1: openMessages()
-Frontend -> MessageAPI : 1.1: GET conversations
-MessageAPI -> ConversationDB : 1.1.1: fetch by userId
-MessageAPI -> MessageDB : 1.1.2: fetch message history
-MessageAPI -> Frontend : 1.2: conversation payload
+Student -> Frontend : openMessages()
+Frontend -> MessageAPI : GET conversations
+MessageAPI -> ConversationDB : fetch by userId
+MessageAPI -> MessageDB : fetch message history
+MessageAPI --> Frontend : conversation payload
 
-Student -> Frontend : 2: sendMessage(text)
-Frontend -> MessageAPI : 2.1: POST /messages/send
-MessageAPI -> ConversationDB : 2.1.1: validate participants
-MessageAPI -> SequenceDB : 2.1.2: next message sequence
-MessageAPI -> MessageDB : 2.1.3: insert message
-MessageAPI -> ConversationDB : 2.1.4: update lastMessageAt
-MessageAPI -> Frontend : 2.2: send success
+Student -> Frontend : sendMessage(text)
+Frontend -> MessageAPI : POST /messages/send
+MessageAPI -> ConversationDB : validate participants
+MessageAPI -> SequenceDB : next message sequence
+MessageAPI -> MessageDB : insert message
+MessageAPI -> ConversationDB : update lastMessageAt
+MessageAPI --> Frontend : send success
 @enduml
 ```
 
