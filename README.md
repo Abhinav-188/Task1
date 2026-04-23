@@ -186,57 +186,53 @@ Postconditions: Dashboard panels populated with latest fetched data.
 
 ### 2.3 Use Case Diagram
 
-```plantuml
-@startuml
-left to right direction
-skinparam packageStyle rectangle
+```mermaid
+flowchart LR
+  Guest[Guest]
+  Student[Student]
+  Admin[Admin]
 
-actor Guest
-actor Student
-actor Admin
+  subgraph CampusCart[CampusCart]
+    UC01([UC-01 Browse Listings])
+    UC02([UC-02 View Listing Details])
+    UC03([UC-03 Submit Student Signup Request])
+    UC04([UC-04 Login])
+    UC05([UC-05 Post Listing])
+    UC06([UC-06 Report Listing])
+    UC07([UC-07 View Conversations])
+    UC08([UC-08 Send Message])
+    UC09([UC-09 Delete Conversation])
+    UC10([UC-10 View Pending Requests])
+    UC11([UC-11 Approve Student Request])
+    UC12([UC-12 Reject Student Request])
+    UC13([UC-13 Delete Listing])
+    UC14([UC-14 View Admin Dashboard])
+  end
 
-rectangle CampusCart {
-  usecase "UC-01 Browse Listings" as UC01
-  usecase "UC-02 View Listing Details" as UC02
-  usecase "UC-03 Submit Student Signup Request" as UC03
-  usecase "UC-04 Login" as UC04
-  usecase "UC-05 Post Listing" as UC05
-  usecase "UC-06 Report Listing" as UC06
-  usecase "UC-07 View Conversations" as UC07
-  usecase "UC-08 Send Message" as UC08
-  usecase "UC-09 Delete Conversation" as UC09
-  usecase "UC-10 View Pending Requests" as UC10
-  usecase "UC-11 Approve Student Request" as UC11
-  usecase "UC-12 Reject Student Request" as UC12
-  usecase "UC-13 Delete Listing" as UC13
-  usecase "UC-14 View Admin Dashboard" as UC14
-}
+  Guest --> UC01
+  Guest --> UC02
+  Guest --> UC03
+  Guest --> UC04
 
-Guest --> UC01
-Guest --> UC02
-Guest --> UC03
-Guest --> UC04
+  Student --> UC01
+  Student --> UC02
+  Student --> UC04
+  Student --> UC05
+  Student --> UC06
+  Student --> UC07
+  Student --> UC08
+  Student --> UC09
 
-Student --> UC01
-Student --> UC02
-Student --> UC04
-Student --> UC05
-Student --> UC06
-Student --> UC07
-Student --> UC08
-Student --> UC09
+  Admin --> UC04
+  Admin --> UC05
+  Admin --> UC10
+  Admin --> UC11
+  Admin --> UC12
+  Admin --> UC13
+  Admin --> UC14
 
-Admin --> UC04
-Admin --> UC05
-Admin --> UC10
-Admin --> UC11
-Admin --> UC12
-Admin --> UC13
-Admin --> UC14
-
-UC10 .> UC11 : <<include>>
-UC10 .> UC12 : <<include>>
-@enduml
+  UC10 -. "<<include>>" .-> UC11
+  UC10 -. "<<include>>" .-> UC12
 ```
 
 Diagram note: This diagram maps the primary platform capabilities by actor role. Student and Admin share some base marketplace actions while admin-specific moderation actions are isolated. Approval actions are modeled as included behaviors from pending-request review.
@@ -245,173 +241,175 @@ Diagram note: This diagram maps the primary platform capabilities by actor role.
 
 ### 3.1 Class Diagram
 
-```plantuml
-@startuml
-skinparam classAttributeIconSize 0
+```mermaid
+classDiagram
+  direction LR
 
-class User {
-  +id: int
-  +name: string
-  +email: string
-  +passwordHash: string
-  +role: UserRole
-  +approvalStatus: ApprovalStatus
-  +approvalRequestedAt: datetime
-  +approvedAt: datetime
-  +approvedBy: int
-}
+  class User {
+    +int id
+    +string name
+    +string email
+    +string passwordHash
+    +UserRole role
+    +ApprovalStatus approvalStatus
+    +datetime approvalRequestedAt
+    +datetime approvedAt
+    +int approvedBy
+  }
 
-enum UserRole {
-  student
-  admin
-}
+  class UserRole {
+    <<enumeration>>
+    student
+    admin
+  }
 
-enum ApprovalStatus {
-  pending
-  approved
-  rejected
-}
+  class ApprovalStatus {
+    <<enumeration>>
+    pending
+    approved
+    rejected
+  }
 
-class Product {
-  +id: int
-  +title: string
-  +description: string
-  +price: number
-  +category: string
-  +sellerId: int
-  +sellerName: string
-  +location: string
-  +image: string
-  +status: ProductStatus
-  +createdAt: datetime
-}
+  class Product {
+    +int id
+    +string title
+    +string description
+    +number price
+    +string category
+    +int sellerId
+    +string sellerName
+    +string location
+    +string image
+    +ProductStatus status
+    +datetime createdAt
+  }
 
-enum ProductStatus {
-  available
-  sold
-}
+  class ProductStatus {
+    <<enumeration>>
+    available
+    sold
+  }
 
-class Conversation {
-  +id: int
-  +participantIds: int[2]
-  +productId: int?
-  +productTitle: string
-  +lastMessageAt: datetime
-}
+  class Conversation {
+    +int id
+    +int[2] participantIds
+    +int? productId
+    +string productTitle
+    +datetime lastMessageAt
+  }
 
-class Message {
-  +id: int
-  +conversationId: int
-  +senderId: int
-  +receiverId: int
-  +text: string
-  +createdAt: datetime
-}
+  class Message {
+    +int id
+    +int conversationId
+    +int senderId
+    +int receiverId
+    +string text
+    +datetime createdAt
+  }
 
-class Report {
-  +id: int
-  +productId: int
-  +reporterId: int
-  +reporterEmail: string
-  +reason: ReportReason
-  +details: string
-  +status: ReportStatus
-  +createdAt: datetime
-}
+  class Report {
+    +int id
+    +int productId
+    +int reporterId
+    +string reporterEmail
+    +ReportReason reason
+    +string details
+    +ReportStatus status
+    +datetime createdAt
+  }
 
-enum ReportReason {
-  spam
-  fraud
-  prohibited
-  misleading
-  other
-}
+  class ReportReason {
+    <<enumeration>>
+    spam
+    fraud
+    prohibited
+    misleading
+    other
+  }
 
-enum ReportStatus {
-  pending
-  resolved
-}
+  class ReportStatus {
+    <<enumeration>>
+    pending
+    resolved
+  }
 
-class SequenceCounter {
-  +key: string
-  +value: int
-}
+  class SequenceCounter {
+    +string key
+    +int value
+  }
 
-class AuthService <<service>> {
-  +login(email, password)
-  +submitSignupRequest(name, email, password)
-}
+  class AuthService {
+    <<service>>
+    +login(email, password)
+    +submitSignupRequest(name, email, password)
+  }
 
-class ProductService <<service>> {
-  +listAvailableProducts()
-  +getProductById(id)
-  +createProduct(payload)
-  +deleteProduct(productId, adminId)
-  +reportProduct(productId, payload)
-}
+  class ProductService {
+    <<service>>
+    +listAvailableProducts()
+    +getProductById(id)
+    +createProduct(payload)
+    +deleteProduct(productId, adminId)
+    +reportProduct(productId, payload)
+  }
 
-class MessagingService <<service>> {
-  +getConversations(userId)
-  +sendMessage(payload)
-  +deleteConversation(conversationId, userId)
-}
+  class MessagingService {
+    <<service>>
+    +getConversations(userId)
+    +sendMessage(payload)
+    +deleteConversation(conversationId, userId)
+  }
 
-class AdminService <<service>> {
-  +getPendingStudentRequests(adminId)
-  +approveStudent(studentId, adminId)
-  +rejectStudent(studentId, adminId)
-}
+  class AdminService {
+    <<service>>
+    +getPendingStudentRequests(adminId)
+    +approveStudent(studentId, adminId)
+    +rejectStudent(studentId, adminId)
+  }
 
-User "1" --> "0..*" Product : seller
-User "1" --> "0..*" Report : reporter
-Product "1" --> "0..*" Report : reportedAgainst
-Conversation "1" o-- "0..*" Message : contains
-User "0..*" -- "0..*" Conversation : participates
+  User "1" --> "0..*" Product : seller
+  User "1" --> "0..*" Report : reporter
+  Product "1" --> "0..*" Report : reportedAgainst
+  Conversation "1" o-- "0..*" Message : contains
+  User "0..*" -- "0..*" Conversation : participates
 
-AuthService ..> User
-ProductService ..> Product
-ProductService ..> User
-ProductService ..> Report
-MessagingService ..> Conversation
-MessagingService ..> Message
-AdminService ..> User
-AdminService ..> Product
-@enduml
+  AuthService ..> User
+  ProductService ..> Product
+  ProductService ..> User
+  ProductService ..> Report
+  MessagingService ..> Conversation
+  MessagingService ..> Message
+  AdminService ..> User
+  AdminService ..> Product
 ```
 
 Diagram note: The class model combines core domain entities with service abstractions used by API routes. Relationships align with moderation, listing, and messaging behavior. Enum types encode role/status constraints used in validation and authorization.
 
 ### 3.2 Activity Diagram (Marketplace Interaction)
 
-```plantuml
-@startuml
-start
-:Open marketplace;
-:Search and filter listings;
-if (Listing selected?) then (yes)
-  :View listing details;
-  if (Contact seller?) then (yes)
-    if (User logged in?) then (yes)
-      :Open conversation view;
-      :Send or continue messages;
-    else (no)
-      :Redirect to login page;
-    endif
-  endif
-
-  if (Report listing?) then (yes)
-    if (User logged in?) then (yes)
-      :Submit reason and details;
-      :Store report as pending;
-    else (no)
-      :Redirect to login page;
-    endif
-  endif
-else (no)
-  :Refine search criteria;
-endif
-stop
-@enduml
+```mermaid
+flowchart TD
+  A([Start]) --> B[Open marketplace]
+  B --> C[Search and filter listings]
+  C --> D{Listing selected?}
+  D -- No --> E[Refine search criteria]
+  E --> Z([Stop])
+  D -- Yes --> F[View listing details]
+  F --> G{Contact seller?}
+  G -- Yes --> H{User logged in?}
+  H -- Yes --> I[Open conversation view]
+  I --> J[Send or continue messages]
+  H -- No --> K[Redirect to login page]
+  G -- No --> L{Report listing?}
+  J --> L
+  K --> L
+  L -- No --> Z
+  L -- Yes --> M{User logged in?}
+  M -- Yes --> N[Submit reason and details]
+  N --> O[Store report as pending]
+  O --> Z
+  M -- No --> P[Redirect to login page]
+  P --> Z
 ```
 
 Diagram note: This activity captures core student-side marketplace behavior from browse to interaction. Decision branches show authentication gates around messaging/reporting and preserve guest read-only access.
@@ -420,103 +418,100 @@ Diagram note: This activity captures core student-side marketplace behavior from
 
 #### Workflow A: Student Signup, Admin Approval, and Login
 
-```plantuml
-@startuml
-autonumber
-actor Student
-actor Admin
-participant Frontend
-participant AuthAPI
-participant AdminAPI
-database UserDB
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Student
+  actor Admin
+  participant Frontend
+  participant AuthAPI
+  participant AdminAPI
+  participant UserDB
 
-Student -> Frontend: Submit signup request (name, email, password)
-Frontend -> AuthAPI: POST /students/signup-request
-AuthAPI -> UserDB: Find user by email
-AuthAPI -> UserDB: Create or update student with status=pending
-AuthAPI --> Frontend: Signup submitted (pending approval)
+  Student->>Frontend: Submit signup request (name, email, password)
+  Frontend->>AuthAPI: POST /students/signup-request
+  AuthAPI->>UserDB: Find user by email
+  AuthAPI->>UserDB: Create or update student with status=pending
+  AuthAPI-->>Frontend: Signup submitted (pending approval)
 
-Admin -> Frontend: Open pending requests page
-Frontend -> AdminAPI: GET /admin/pending-student-requests?adminId
-AdminAPI -> UserDB: Query pending student users
-AdminAPI --> Frontend: Pending request list
+  Admin->>Frontend: Open pending requests page
+  Frontend->>AdminAPI: GET /admin/pending-student-requests?adminId
+  AdminAPI->>UserDB: Query pending student users
+  AdminAPI-->>Frontend: Pending request list
 
-Admin -> Frontend: Approve request
-Frontend -> AdminAPI: POST /admin/pending-student-requests/{studentId}/approve
-AdminAPI -> UserDB: Set approvalStatus=approved, approvedAt, approvedBy
-AdminAPI --> Frontend: Approval success
+  Admin->>Frontend: Approve request
+  Frontend->>AdminAPI: POST /admin/pending-student-requests/{studentId}/approve
+  AdminAPI->>UserDB: Set approvalStatus=approved, approvedAt, approvedBy
+  AdminAPI-->>Frontend: Approval success
 
-Student -> Frontend: Login with email/password
-Frontend -> AuthAPI: POST /login
-AuthAPI -> UserDB: Validate credentials and approval status
-alt Approved student/admin
-  AuthAPI --> Frontend: Login success + public user profile
-else Pending/rejected student
-  AuthAPI --> Frontend: 403 with approval status message
-end
-@enduml
+  Student->>Frontend: Login with email/password
+  Frontend->>AuthAPI: POST /login
+  AuthAPI->>UserDB: Validate credentials and approval status
+  alt Approved student/admin
+    AuthAPI-->>Frontend: Login success + public user profile
+  else Pending/rejected student
+    AuthAPI-->>Frontend: 403 with approval status message
+  end
 ```
 
 Diagram note: This sequence models the full onboarding gate with a human-in-the-loop approval step. The final login branch enforces the student approval policy consistently with business rules.
 
 #### Workflow B: Create Listing
 
-```plantuml
-@startuml
-autonumber
-actor Seller as Student
-participant Frontend
-participant ProductAPI
-database UserDB
-database SequenceDB
-database ProductDB
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Student
+  participant Frontend
+  participant ProductAPI
+  participant UserDB
+  participant SequenceDB
+  participant ProductDB
 
-Student -> Frontend: Fill and submit listing form
-Frontend -> ProductAPI: POST /products (title, desc, category, price, location, sellerEmail, image)
-ProductAPI -> ProductAPI: Validate required fields and positive price
-ProductAPI -> UserDB: Find seller by email
-UserDB --> ProductAPI: Seller exists
-ProductAPI -> SequenceDB: Get next sequence for products
-SequenceDB --> ProductAPI: New productId
-ProductAPI -> ProductDB: Insert Product(status=available)
-ProductDB --> ProductAPI: Created
-ProductAPI --> Frontend: 201 listing created
-Frontend --> Student: Navigate to marketplace/admin dashboard
-@enduml
+  Student->>Frontend: Fill and submit listing form
+  Frontend->>ProductAPI: POST /products (title, desc, category, price, location, sellerEmail, image)
+  ProductAPI->>ProductAPI: Validate required fields and positive price
+  ProductAPI->>UserDB: Find seller by email
+  UserDB-->>ProductAPI: Seller exists
+  ProductAPI->>SequenceDB: Get next sequence for products
+  SequenceDB-->>ProductAPI: New productId
+  ProductAPI->>ProductDB: Insert Product(status=available)
+  ProductDB-->>ProductAPI: Created
+  ProductAPI-->>Frontend: 201 listing created
+  Frontend-->>Student: Navigate to marketplace/admin dashboard
 ```
 
 Diagram note: This sequence highlights validation, seller identity resolution, ID generation, and persistence. It also reflects role-shared listing creation for approved students and admins.
 
 #### Workflow C: Messaging in Conversation
 
-```plantuml
-@startuml
-autonumber
-actor Student
-participant Frontend
-participant MessageAPI
-database ConversationDB
-database MessageDB
-database SequenceDB
+```mermaid
+sequenceDiagram
+  autonumber
+  actor Student
+  participant Frontend
+  participant MessageAPI
+  participant ConversationDB
+  participant MessageDB
+  participant SequenceDB
 
-Student -> Frontend: Open messages page
-Frontend -> MessageAPI: GET /messages/conversations?userId
-MessageAPI -> ConversationDB: Fetch conversations for participant
-MessageAPI -> MessageDB: Fetch messages for returned conversationIds
-MessageAPI --> Frontend: Conversations with message history
+  Student->>Frontend: Open messages page
+  Frontend->>MessageAPI: GET /messages/conversations?userId
+  MessageAPI->>ConversationDB: Fetch conversations for participant
+  MessageAPI->>MessageDB: Fetch messages for returned conversationIds
+  MessageAPI-->>Frontend: Conversations with message history
 
-Student -> Frontend: Send message text
-Frontend -> MessageAPI: POST /messages/send (conversationId, senderId, receiverId, text)
-MessageAPI -> ConversationDB: Validate conversation and participants
-MessageAPI -> SequenceDB: Get next sequence for messages
-MessageAPI -> MessageDB: Insert message record
-MessageAPI -> ConversationDB: Update lastMessageAt
-MessageAPI --> Frontend: Message sent + updated metadata
+  Student->>Frontend: Send message text
+  Frontend->>MessageAPI: POST /messages/send (conversationId, senderId, receiverId, text)
+  MessageAPI->>ConversationDB: Validate conversation and participants
+  MessageAPI->>SequenceDB: Get next sequence for messages
+  MessageAPI->>MessageDB: Insert message record
+  MessageAPI->>ConversationDB: Update lastMessageAt
+  MessageAPI-->>Frontend: Message sent + updated metadata
 
-alt conversationId not provided
-  MessageAPI -> ConversationDB: Find or create 2-party conversation
-end
-@enduml
+  alt conversationId not provided
+    MessageAPI->>ConversationDB: Find or create 2-party conversation
+  end
 ```
 
 Diagram note: This sequence supports both existing-thread messaging and API-level creation fallback when conversation ID is absent. Participant validation protects conversation access boundaries.
@@ -525,90 +520,84 @@ Diagram note: This sequence supports both existing-thread messaging and API-leve
 
 ### 4.1 Workflow A Collaboration Diagram
 
-```plantuml
-@startuml
-autonumber
-actor Student
-actor Admin
-participant Frontend
-participant AuthAPI
-participant AdminAPI
-database UserDB
+```mermaid
+flowchart LR
+  Student[Student]
+  Admin[Admin]
+  Frontend[Frontend]
+  AuthAPI[AuthAPI]
+  AdminAPI[AdminAPI]
+  UserDB[(UserDB)]
 
-Student -> Frontend : submitSignup()
-Frontend -> AuthAPI : POST signup-request
-AuthAPI -> UserDB : create/update pending student
-AuthAPI --> Frontend : signup response
+  Student -->|1: submit signup| Frontend
+  Frontend -->|1.1: POST signup-request| AuthAPI
+  AuthAPI -->|1.1.1: create/update pending student| UserDB
+  AuthAPI -->|1.2: signup response| Frontend
 
-Admin -> Frontend : viewPendingRequests()
-Frontend -> AdminAPI : GET pending requests
-AdminAPI -> UserDB : query pending users
-AdminAPI --> Frontend : pending list
+  Admin -->|2: view pending requests| Frontend
+  Frontend -->|2.1: GET pending requests| AdminAPI
+  AdminAPI -->|2.1.1: query pending users| UserDB
+  AdminAPI -->|2.2: pending list| Frontend
 
-Admin -> Frontend : approve(studentId)
-Frontend -> AdminAPI : POST approve
-AdminAPI -> UserDB : set status approved
+  Admin -->|3: approve student| Frontend
+  Frontend -->|3.1: POST approve| AdminAPI
+  AdminAPI -->|3.1.1: set status approved| UserDB
 
-Student -> Frontend : login()
-Frontend -> AuthAPI : POST login
-AuthAPI -> UserDB : validate credentials/status
-AuthAPI --> Frontend : auth result
-@enduml
+  Student -->|4: login| Frontend
+  Frontend -->|4.1: POST login| AuthAPI
+  AuthAPI -->|4.1.1: validate credentials/status| UserDB
+  AuthAPI -->|4.2: auth result| Frontend
 ```
 
 Diagram note: Numbered messages emphasize object collaboration rather than strict time lanes. It matches the same interaction set as Sequence Workflow A.
 
 ### 4.2 Workflow B Collaboration Diagram
 
-```plantuml
-@startuml
-autonumber
-actor Student
-participant Frontend
-participant ProductAPI
-database UserDB
-database SequenceDB
-database ProductDB
+```mermaid
+flowchart LR
+  Student[Student]
+  Frontend[Frontend]
+  ProductAPI[ProductAPI]
+  UserDB[(UserDB)]
+  SequenceDB[(SequenceDB)]
+  ProductDB[(ProductDB)]
 
-Student -> Frontend : submitListingForm()
-Frontend -> ProductAPI : POST /products
-ProductAPI -> ProductAPI : validate payload
-ProductAPI -> UserDB : resolve seller by email
-ProductAPI -> SequenceDB : next product sequence
-ProductAPI -> ProductDB : insert product
-ProductAPI --> Frontend : listing created
-Frontend --> Student : success UI/navigation
-@enduml
+  Student -->|1: submit listing form| Frontend
+  Frontend -->|1.1: POST /products| ProductAPI
+  ProductAPI -->|1.1.1: validate payload| ProductAPI
+  ProductAPI -->|1.1.2: resolve seller by email| UserDB
+  ProductAPI -->|1.1.3: next product sequence| SequenceDB
+  ProductAPI -->|1.1.4: insert product| ProductDB
+  ProductAPI -->|1.2: listing created| Frontend
+  Frontend -->|1.3: success UI/navigation| Student
 ```
 
 Diagram note: This communication view focuses on responsibility distribution across API logic and persistence components for listing creation. It mirrors Sequence Workflow B.
 
 ### 4.3 Workflow C Collaboration Diagram
 
-```plantuml
-@startuml
-autonumber
-actor Student
-participant Frontend
-participant MessageAPI
-database ConversationDB
-database MessageDB
-database SequenceDB
+```mermaid
+flowchart LR
+  Student[Student]
+  Frontend[Frontend]
+  MessageAPI[MessageAPI]
+  ConversationDB[(ConversationDB)]
+  MessageDB[(MessageDB)]
+  SequenceDB[(SequenceDB)]
 
-Student -> Frontend : openMessages()
-Frontend -> MessageAPI : GET conversations
-MessageAPI -> ConversationDB : fetch by userId
-MessageAPI -> MessageDB : fetch message history
-MessageAPI --> Frontend : conversation payload
+  Student -->|1: open messages| Frontend
+  Frontend -->|1.1: GET conversations| MessageAPI
+  MessageAPI -->|1.1.1: fetch by userId| ConversationDB
+  MessageAPI -->|1.1.2: fetch message history| MessageDB
+  MessageAPI -->|1.2: conversation payload| Frontend
 
-Student -> Frontend : sendMessage(text)
-Frontend -> MessageAPI : POST /messages/send
-MessageAPI -> ConversationDB : validate participants
-MessageAPI -> SequenceDB : next message sequence
-MessageAPI -> MessageDB : insert message
-MessageAPI -> ConversationDB : update lastMessageAt
-MessageAPI --> Frontend : send success
-@enduml
+  Student -->|2: send message| Frontend
+  Frontend -->|2.1: POST /messages/send| MessageAPI
+  MessageAPI -->|2.1.1: validate participants| ConversationDB
+  MessageAPI -->|2.1.2: next message sequence| SequenceDB
+  MessageAPI -->|2.1.3: insert message| MessageDB
+  MessageAPI -->|2.1.4: update lastMessageAt| ConversationDB
+  MessageAPI -->|2.2: send success| Frontend
 ```
 
 Diagram note: This diagram preserves numbered interactions for read and write message flows. It corresponds directly to Sequence Workflow C.
@@ -636,63 +625,52 @@ Diagram note: Level 0 treats CampusCart as a single process interacting with ext
 ```mermaid
 flowchart TB
   %% External Entities
-  E1[Guest]
-  E2[Student]
-  E3[Admin]
+  U[User Guest Student]
+  A[Admin]
 
   %% Processes
-  P1((1.0 User and Auth Management))
-  P2((2.0 Product Management))
-  P3((3.0 Messaging Management))
-  P4((4.0 Admin Moderation))
+  P1((1.0 Auth and User Management))
+  P2((2.0 Listings and Reports))
+  P3((3.0 Messaging))
+  P4((4.0 Moderation and Dashboard))
 
   %% Data Stores
   D1[(D1 Users)]
-  D2[(D2 Products)]
-  D3[(D3 Conversations)]
-  D4[(D4 Messages)]
-  D5[(D5 Reports)]
-  D6[(D6 Sequences)]
+  D2[(D2 Marketplace Data)]
+  D3[(D3 Chat Data)]
+  D4[(D4 Sequences)]
 
-  %% Auth Flows
-  E1 -->|Signup/login data| P1
-  E2 -->|Login data| P1
-  E3 -->|Login data| P1
-  P1 -->|Account/profile response| E1
-  P1 -->|Session/profile response| E2
-  P1 -->|Session/profile response| E3
-  P1 <--> D1
-  P1 <--> D6
+  %% User-facing flows
+  U -->|Signup and login| P1
+  P1 -->|Profile and session response| U
 
-  %% Product Flows
-  E1 -->|Browse/view listing request| P2
-  E2 -->|Create/report listing| P2
-  E3 -->|Create/delete listing| P2
-  P2 -->|Listing details/results| E1
-  P2 -->|Listing action response| E2
-  P2 -->|Moderation action response| E3
-  P2 <--> D2
-  P2 <--> D5
-  P2 <--> D1
-  P2 <--> D6
+  U -->|Browse listings and create reports| P2
+  P2 -->|Listing and report response| U
 
-  %% Messaging Flows
-  E2 -->|Conversation and message actions| P3
-  P3 -->|Thread list and send result| E2
-  P3 <--> D3
-  P3 <--> D4
-  P3 <--> D1
-  P3 <--> D6
+  U -->|Conversation and message actions| P3
+  P3 -->|Thread and message response| U
 
-  %% Admin Moderation Flows
-  E3 -->|Pending request review actions| P4
-  P4 -->|Approval/rejection results, dashboard data| E3
-  P4 <--> D1
-  P4 <--> D2
-  P4 <--> D5
+  %% Admin flows
+  A -->|Review requests and moderate data| P4
+  P4 -->|Approval and dashboard response| A
+
+  %% Data interactions
+  P1 <-->|read and write| D1
+  P1 <-->|next id| D4
+
+  P2 <-->|listings and reports| D2
+  P2 -->|user lookup| D1
+  P2 <-->|next id| D4
+
+  P3 <-->|conversations and messages| D3
+  P3 -->|participant lookup| D1
+  P3 <-->|next id| D4
+
+  P4 -->|manage users| D1
+  P4 -->|moderate marketplace| D2
 ```
 
-Diagram note: Level 1 decomposes CampusCart into four major processes aligned with API modules. Data stores map directly to persistent entities and shared sequence generation.
+Diagram note: This compact Level 1 view preserves the four core processes while grouping related stores to reduce visual complexity.
 
 ## 6. Consistency Mapping (SRS to Diagrams)
 
@@ -701,7 +679,7 @@ Diagram note: Level 1 decomposes CampusCart into four major processes aligned wi
 | Authentication and approval gate | UC-03, UC-04, UC-10, UC-11, UC-12; Sequence A; Collaboration A; DFD P1/P4 |
 | Product lifecycle and moderation | UC-01, UC-02, UC-05, UC-06, UC-13; Sequence B; Collaboration B; DFD P2 |
 | Messaging workflows | UC-07, UC-08, UC-09; Sequence C; Collaboration C; DFD P3 |
-| Data model constraints | Class Diagram enums/associations; DFD stores D1-D6 |
+| Data model constraints | Class Diagram enums/associations; DFD grouped stores D1-D4 |
 | Operational monitoring | FR-18; DFD process boundary and system interactions |
 
 ## 7. Summary
